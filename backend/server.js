@@ -1,5 +1,5 @@
 import express from "express";
-
+import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import productRoutes from "./routes/productRoutes.js";
@@ -29,5 +29,8 @@ app.get("/api/products/:id", (req, res) => {
 //it's going to go to this file product routes, which is what we just created.
 //That's why we don't have API slash products in here because then it would go to it twice, right?
 app.use("/api/products", productRoutes);
+
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
