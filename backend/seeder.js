@@ -8,24 +8,50 @@ import Product from "./models/productModel.js";
 import Order from "./models/orderModel.js";
 import connectDB from "./config/db.js";
 
-//now we want to initialize out dotenv so we can use those variables.
 dotenv.config();
 
-//we want to connect to our database
 connectDB();
 
-//two functions --- import data & destroy data
 const importData = async () => {
-  //first of all, just delete everything.
-  //so before we import any products or users, we want to delete them all.
   try {
-    //to do that we going to await, because everymongoose method that you call is going to return a romise.
     await Order.deleteMany();
     await Product.deleteMany();
     await User.deleteMany();
 
-    //now we want to create our users and we're going to put the created users into a variable.
-    const createUsers = await User.insertMany(users);
-    const adminUser = createUsers[0]._id;
-  } catch (error) {}
+    const createdUsers = await User.insertMany(users);
+
+    const adminUser = createdUsers[0]._id;
+
+    const sampleProducts = products.map((product) => {
+      return { ...product, user: adminUser };
+    });
+
+    await Product.insertMany(sampleProducts);
+
+    console.log("Data Imported!".green.inverse);
+    process.exit();
+  } catch (error) {
+    console.error(`${error}`.red.inverse);
+    process.exit(1);
+  }
 };
+
+const destroyData = async () => {
+  try {
+    await Order.deleteMany();
+    await Product.deleteMany();
+    await User.deleteMany();
+
+    console.log("Data Destroyed!".red.inverse);
+    process.exit();
+  } catch (error) {
+    console.error(`${error}`.red.inverse);
+    process.exit(1);
+  }
+};
+
+if (process.argv[2] === "-d") {
+  destroyData();
+} else {
+  importData();
+}
